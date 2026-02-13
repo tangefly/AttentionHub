@@ -1,0 +1,22 @@
+[build-system]
+requires = ["setuptools>=61", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "AttentionHub"
+version = "0.1.0"
+description = "Various attention implementations."
+readme = "README.md"
+requires-python = ">=3.9"
+
+dependencies = [
+    "torch",
+    "einops",
+    "numpy",
+    "matplotlib",
+    "psutil"
+]
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["attention*"]
