@@ -2,17 +2,16 @@ import torch.nn.functional as F
 from attention import scaled_dot_product_attention
 from benchmark_attention import *
 
-def my_attn(Q, K, V):
+def sdpa(Q, K, V):
     return scaled_dot_product_attention(Q, K, V)[0]
-
 
 def torch_attn(Q, K, V):
     return F.scaled_dot_product_attention(Q, K, V)
 
 
 ops = {
-    "mine": my_attn,
-    "torch": torch_attn,
+    "sdpa": sdpa,
+    "torch adpa": torch_attn,
 }
 
 sizes = [512, 1024, 2048, 4096]
