@@ -21,7 +21,7 @@ $$
 
 ## 4 Demo
 
-```
+```python
 from attention import scaled_dot_product_attention
 import torch
 

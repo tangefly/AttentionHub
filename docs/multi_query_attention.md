@@ -19,7 +19,7 @@ MQA 的计算公式和 SDPA 的计算公式一模一样，区别在于，MQA 的
 
 ## 4 Demo
 
-```
+```python
 from attention import multi_query_attention
 import torch
 
