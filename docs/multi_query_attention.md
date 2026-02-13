@@ -16,3 +16,25 @@ MQA 的计算公式和 SDPA 的计算公式一模一样，区别在于，MQA 的
 - 计算复杂度高，对于 $token$ 数量 $n$ 来说，$n$ 个 $q$ 要和 $n$ 个 $k$ 计算点积，随着 $n$ 的增长，复杂度呈现 $O(n^2)$。
 - 由于计算复杂度呈现 $O(n^2)$，计算复杂度会导致 LLM 对长文本的支持减弱。
 - 由于多个注意力头共享同一份 $K,V$，可能导致模型表达能力下降，模型训练更慢收敛。
+
+## 4 Demo
+
+```
+from attention import multi_query_attention
+import torch
+
+b, h, n, d = 16, 8, 32, 64
+dtype = torch.float32
+
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+print("using device:", device)
+
+Q = torch.randn(b, h, n, d, device=device, dtype=dtype)
+K = torch.randn(b, n, d, device=device, dtype=dtype)
+V = torch.randn(b, n, d, device=device, dtype=dtype)
+
+output, attention_weights = multi_query_attention(Q, K, V)
+
+print(f"output shape: {output.shape}")
+print(f"attention_weights shape: {attention_weights.shape}")
+```
