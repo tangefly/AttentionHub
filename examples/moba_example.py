@@ -1,4 +1,4 @@
-from attention import moba_attn_varlen_naive
+from attention import moba_attn_varlen_naive, moba_attn_varlen
 import torch
 import random
 
@@ -30,7 +30,7 @@ def generate_data(batch, seqlen, num_q_head, num_kv_head, headdim, dtype):
 
     return q, k, v, cu_seqlen, max_seqlen.item()
 
-def test_attn_varlen_moba(batch, head, seqlen, head_dim, moba_chunk_size, moba_topk):
+def test_attn_varlen_moba_naive(batch, head, seqlen, head_dim, moba_chunk_size, moba_topk):
     dtype = torch.bfloat16
     eps = 2e-2
 
@@ -51,5 +51,27 @@ def test_attn_varlen_moba(batch, head, seqlen, head_dim, moba_chunk_size, moba_t
         moba_topk=moba_topk,
     )
 
+def test_attn_varlen_moba(batch, head, seqlen, head_dim, moba_chunk_size, moba_topk):
+    dtype = torch.bfloat16
+    eps = 2e-2
+
+    # Get data
+    q, k, v, cu_seqlen, max_seqlen = generate_data(
+        batch, seqlen, head, head, head_dim, dtype
+    )
+    vo_grad = torch.randn_like(q)
+
+    # varlen func
+    o_ref = moba_attn_varlen(
+        q,
+        k,
+        v,
+        cu_seqlen,
+        max_seqlen,
+        moba_chunk_size=moba_chunk_size,
+        moba_topk=moba_topk,
+    )
+
 batch, head, seqlen, head_dim, moba_chunk_size, moba_topk = 4, 4, 1024, 128, 256, 3
+test_attn_varlen_moba_naive(batch, head, seqlen, head_dim, moba_chunk_size, moba_topk)
 test_attn_varlen_moba(batch, head, seqlen, head_dim, moba_chunk_size, moba_topk)
