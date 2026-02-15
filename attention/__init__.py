@@ -3,9 +3,11 @@ from .multi_query_attention import multi_query_attention
 from .grouped_query_attention import grouped_query_attention
 from .factorized_attention import factorized_attention
 from .predict_sparse_attention import PredictSparseAttention
+from .mixture_of_block_attention import moba_attn_varlen_naive
 
 __all__ = ["scaled_dot_product_attention",
            "multi_query_attention",
            "grouped_query_attention",
            "factorized_attention",
-           "PredictSparseAttention"]
+           "PredictSparseAttention",
+           "moba_attn_varlen_naive"]
