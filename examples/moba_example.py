@@ -6,7 +6,7 @@ def generate_data(batch, seqlen, num_q_head, num_kv_head, headdim, dtype):
     random.seed(0)
     torch.manual_seed(0)
     torch.cuda.manual_seed(0)
-    device = torch.cuda.current_device()
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
     # gen qkv
     q = torch.randn(

@@ -15,3 +15,4 @@ pip install -e .
 | grouped_query_attention | [grouped_query_attention.md](https://github.com/tangefly/AttentionHub/blob/main/docs/grouped_query_attention.md) |
 | factorized_attention | [factorized_attention.md](https://github.com/tangefly/AttentionHub/blob/main/docs/factorized_attention.md) |
 | predict_sparse_attention | [predict_sparse_attention.md](https://github.com/tangefly/AttentionHub/blob/main/docs/predict_sparse_attention.md) |
+| mixture_of_block_attention | [mixture_of_block_attention.md](https://github.com/tangefly/AttentionHub/blob/main/docs/mixture_of_block_attention.md) |
