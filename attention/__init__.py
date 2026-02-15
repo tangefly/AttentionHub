@@ -1,9 +1,9 @@
-from .scaled_dot_product_attention import scaled_dot_product_attention
-from .multi_query_attention import multi_query_attention
-from .grouped_query_attention import grouped_query_attention
-from .factorized_attention import factorized_attention
-from .predict_sparse_attention import PredictSparseAttention
-from .mixture_of_block_attention import moba_attn_varlen_naive
+from .sdpa.reference import scaled_dot_product_attention
+from .mqa.reference import multi_query_attention
+from .gqa.reference import grouped_query_attention
+from .fta.reference import factorized_attention
+from .psa.reference import PredictSparseAttention
+from .moba.reference import moba_attn_varlen_naive
 
 __all__ = ["scaled_dot_product_attention",
            "multi_query_attention",
