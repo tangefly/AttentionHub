@@ -5,13 +5,13 @@ from attention.rope import build_rope_cache_batched
 
 
 def main():
-    batch, seq_len = 2, 64
-    hidden_size = 256
-    num_heads = 8
-    kv_lora_rank = 32
-    qk_nope_head_dim, qk_rope_head_dim = 32, 16
-    v_head_dim = 32
-    q_lora_rank = 64
+    batch, seq_len = 32, 512
+    hidden_size = 5120
+    num_heads = 128
+    q_lora_rank = 1536
+    kv_lora_rank = 512
+    qk_nope_head_dim, qk_rope_head_dim = 128, 64
+    v_head_dim = 128
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     dtype = torch.float32
@@ -33,7 +33,7 @@ def main():
     layer.eval()
 
     hidden_states = torch.randn(batch, seq_len, hidden_size, device=device, dtype=dtype)
-    
+
     cos, sin = build_rope_cache_batched(
         batch,
         seq_len,

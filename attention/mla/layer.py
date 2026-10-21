@@ -185,17 +185,17 @@ class MultiHeadLatentAttention(nn.Module):
         return key_states, value_states
 
     @staticmethod
-    def _to_half_layout(x: torch.Tensor) -> torch.Tensor:
+    def to_half_layout(x: torch.Tensor) -> torch.Tensor:
         """Reorder interleaved pairs to the ``[even, odd]`` half layout."""
         return torch.cat((x[..., 0::2], x[..., 1::2]), dim=-1)
 
     @staticmethod
-    def _from_half_layout(x: torch.Tensor) -> torch.Tensor:
+    def from_half_layout(x: torch.Tensor) -> torch.Tensor:
         """Reorder a ``[even, odd]`` half layout back to interleaved pairs."""
         half = x.shape[-1] // 2
         return torch.stack((x[..., :half], x[..., half:]), dim=-1).flatten(-2)
 
-    def _apply_rope(
+    def apply_rope(
         self,
         q_pe: torch.Tensor,
         k_pe: torch.Tensor,
@@ -208,12 +208,12 @@ class MultiHeadLatentAttention(nn.Module):
         # DeepSeek rotates adjacent channel pairs, while the shared RoPE
         # implementation rotates the two halves of the vector.  Permuting the
         # channels before and after the call maps one convention onto the other.
-        q_pe = self._to_half_layout(q_pe)
-        k_pe = self._to_half_layout(k_pe)
+        q_pe = self.to_half_layout(q_pe)
+        k_pe = self.to_half_layout(k_pe)
         q_pe, k_pe = apply_rotary_pos_emb(q_pe, k_pe, cos, sin)
-        return self._from_half_layout(q_pe), self._from_half_layout(k_pe)
+        return self.from_half_layout(q_pe), self.from_half_layout(k_pe)
 
-    def _prepare_position_embeddings(
+    def prepare_position_embeddings(
         self,
         position_embeddings: tuple[torch.Tensor, torch.Tensor],
         seq_length: int,
@@ -248,7 +248,7 @@ class MultiHeadLatentAttention(nn.Module):
         # done by the QSA layer, and use the last ``seq_length`` entries.
         return cos[:, -seq_length:], sin[:, -seq_length:]
 
-    def _eager_attention(
+    def eager_attention(
         self,
         query_states: torch.Tensor,
         key_states: torch.Tensor,
@@ -323,10 +323,10 @@ class MultiHeadLatentAttention(nn.Module):
         )
         k_pe = k_pe.view(batch_size, 1, seq_length, self.qk_rope_head_dim)
 
-        cos, sin = self._prepare_position_embeddings(
+        cos, sin = self.prepare_position_embeddings(
             position_embeddings, seq_length
         )
-        q_pe, k_pe = self._apply_rope(q_pe, k_pe, cos, sin)
+        q_pe, k_pe = self.apply_rope(q_pe, k_pe, cos, sin)
 
         query_states = torch.cat((q_nope, q_pe), dim=-1)
         key_states, value_states = self.expand_kv(k_nope, k_pe)
@@ -338,7 +338,7 @@ class MultiHeadLatentAttention(nn.Module):
                 device=hidden_states.device,
             )
 
-        attn_output, attn_weights = self._eager_attention(
+        attn_output, attn_weights = self.eager_attention(
             query_states,
             key_states,
             value_states,
