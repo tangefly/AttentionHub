@@ -2,7 +2,12 @@ from torch import nn
 import torch
 import math
 
+from ..norm import QwenRMSNorm
 from ..rope import apply_rotary_pos_emb
+
+# Backwards-compatible name for the RMSNorm that used to live in this module.
+RMSNorm = QwenRMSNorm
+
 
 def repeat_kv(hidden_states, n_rep):
     """Repeat KV heads to match the number of query heads (GQA/MQA)."""
@@ -13,6 +18,7 @@ def repeat_kv(hidden_states, n_rep):
         batch, num_key_value_heads, n_rep, seq_len, head_dim
     )
     return hidden_states.reshape(batch, num_key_value_heads * n_rep, seq_len, head_dim)
+
 
 def eager_attention_forward(module, query, key, value, attention_mask, scaling, dropout=0.0):
     """Plain PyTorch attention used after the QSA mask has been built."""
@@ -33,33 +39,6 @@ def eager_attention_forward(module, query, key, value, attention_mask, scaling, 
 
     return attn_output, attn_weights
 
-class RMSNorm(nn.Module):
-    def __init__(
-        self, 
-        dim: int, 
-        group_size: int | None = None, 
-        eps: float = 1e-6
-    ):
-        super().__init__()
-        self.eps = eps
-        self.weight = nn.Parameter(torch.zeros(dim))
-        self.group_size = group_size
-        if group_size is not None and dim % group_size != 0:
-            raise ValueError(f"hidden_size ({dim}) must be divisible by group_size ({group_size}).")
-
-    def _norm(self, x: torch.Tensor) -> torch.Tensor:
-        if self.group_size is not None:
-            x = x.reshape(*x.shape[:-1], -1, self.group_size)
-        out = x * torch.rsqrt(x.pow(2).mean(-1, keepdim=True) + self.eps)
-        return out.flatten(-2) if self.group_size is not None else out
-
-    def forward(self, x):
-        output = self._norm(x.float())
-        output = output * (1.0 + self.weight.float())
-        return output.type_as(x)
-
-    def extra_repr(self):
-        return f"{tuple(self.weight.shape)}, eps={self.eps}"
 
 class QSAIndexer(nn.Module):
     """Select QSA token indices from compressed key blocks."""
@@ -89,8 +68,8 @@ class QSAIndexer(nn.Module):
             (self.index_n_heads + self.index_kv_heads) * self.index_head_dim,
             bias=False,
         )
-        self.q_layernorm = RMSNorm(self.index_head_dim, eps=self.rms_norm_eps)
-        self.k_layernorm = RMSNorm(self.index_head_dim, eps=self.rms_norm_eps)
+        self.q_layernorm = QwenRMSNorm(self.index_head_dim, eps=self.rms_norm_eps)
+        self.k_layernorm = QwenRMSNorm(self.index_head_dim, eps=self.rms_norm_eps)
 
     def forward(
         self,
@@ -207,8 +186,8 @@ class QwenSparseAttention(nn.Module):
         self.o_proj = nn.Linear(
             num_attention_heads * self.head_dim, hidden_size, bias=attention_bias
         )
-        self.q_norm = RMSNorm(self.head_dim, eps=rms_norm_eps)
-        self.k_norm = RMSNorm(self.head_dim, eps=rms_norm_eps)
+        self.q_norm = QwenRMSNorm(self.head_dim, eps=rms_norm_eps)
+        self.k_norm = QwenRMSNorm(self.head_dim, eps=rms_norm_eps)
         self.indexer = QSAIndexer(
             hidden_size,
             indexer_n_heads,

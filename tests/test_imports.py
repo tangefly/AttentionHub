@@ -20,6 +20,7 @@ def test_version_and_kernels():
         "psa",
         "moba",
         "qsa",
+        "mla",
     }
 
 
@@ -41,8 +42,12 @@ def test_import_does_not_load_flash_attn():
 def test_available_backends():
     assert attention.available_backends("sdpa") == ("reference", "torch")
     assert "reference" in attention.available_backends("moba")
+    assert attention.available_backends("mla") == ("reference",)
 
 
 def test_compatibility_aliases():
     assert callable(attention.scaled_dot_product_attention)
     assert attention.QwenSparseAttention is not None
+    assert attention.DeepseekV2Attention is not None
+    assert attention.RMSNorm is not None
+    assert attention.QwenRMSNorm is not None

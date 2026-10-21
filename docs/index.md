@@ -21,7 +21,8 @@ attention/<algorithm>/
 | 2019 | Multi-Query Attention (MQA) | [MQA](mqa.md) | [Link](https://arxiv.org/abs/1911.02150) | ✅ | ❌ | ❌ | ❌ | ❌ |
 | 2022 | Predictive Sparse Attention (PSA) | [PSA](psa.md) | [Link](https://arxiv.org/abs/2110.11299) | ✅ | ❌ | ❌ | ❌ | ❌ |
 | 2023 | Grouped-Query Attention (GQA) | [GQA](gqa.md) | [Link](https://arxiv.org/abs/2305.13245) | ✅ | ❌ | ❌ | ❌ | ❌ |
-| 2025 | Mixture of Block Attention (MoBA) | [MoBA](moba.md) | [Link](https://arxiv.org/abs/2502.13189) | ✅ | ❌ | ✅ | ❌ | ❌ |
+| 2024 | Multi-Head Latent Attention (MLA) | [MLA](mla.md) | [Link](https://arxiv.org/abs/2405.04434) | ✅ | ❌ | ❌ | ❌ | ❌ |
+| 2025 | Mixture of Block Attention (MOBA) | [MOBA](moba.md) | [Link](https://arxiv.org/abs/2502.13189) | ✅ | ❌ | ✅ | ❌ | ❌ |
 | 2026 | Qwen Sparse Attention (QSA) | [QSA](qsa.md) | - | ✅ | ❌ | ❌ | ❌ | ❌ |
 
 ## 约定
@@ -31,3 +32,4 @@ attention/<algorithm>/
 ## 工具
 
 - [RoPE 位置编码](rope.md)：cos/sin 构造与旋转应用。
+- [RMSNorm](norm.md)：MLA 与 QSA 共用的归一化层。

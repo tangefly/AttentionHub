@@ -85,6 +85,15 @@ KERNELS: dict[str, KernelSpec] = {
         backends=("reference",),
         docs="docs/qsa.md",
     ),
+    "mla": KernelSpec(
+        name="mla",
+        full_name="Multi-Head Latent Attention",
+        year=2024,
+        category="compressed",
+        paper="https://arxiv.org/abs/2405.04434",
+        backends=("reference",),
+        docs="docs/mla.md",
+    ),
 }
 
 

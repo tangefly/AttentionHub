@@ -14,7 +14,7 @@ attention/<algorithm>/
     triton.py      # Triton kernel
     cuda/          # custom CUDA extension
     flash.py       # flash-attn integration
-    layer.py       # nn.Module variant (PSA, QSA)
+    layer.py       # nn.Module variant (PSA, QSA, MLA)
 ```
 
 ## Install
@@ -60,7 +60,11 @@ Other kernels follow the same pattern:
 from attention.gqa import gqa
 from attention.moba import moba
 from attention.qsa import QwenSparseAttention
+from attention.mla import DeepseekV2Attention
 ```
+
+MLA and QSA are parameterized layers; their input projections, RoPE and masks
+are documented in [docs/mla.md](docs/mla.md) and [docs/qsa.md](docs/qsa.md).
 
 `available_backends()` reports what can run in the current environment:
 
@@ -94,7 +98,8 @@ See [docs/rope.md](docs/rope.md) for the full API.
 | 2019 | Multi-Query Attention (MQA) | [MQA](docs/mqa.md) | [Link](https://arxiv.org/abs/1911.02150) | ✅ | ❌ | ❌ | ❌ | ❌ |
 | 2022 | Predictive Sparse Attention (PSA) | [PSA](docs/psa.md) | [Link](https://arxiv.org/abs/2110.11299) | ✅ | ❌ | ❌ | ❌ | ❌ |
 | 2023 | Grouped-Query Attention (GQA) | [GQA](docs/gqa.md) | [Link](https://arxiv.org/abs/2305.13245) | ✅ | ❌ | ❌ | ❌ | ❌ |
-| 2025 | Mixture of Block Attention (MoBA) | [MoBA](docs/moba.md) | [Link](https://arxiv.org/abs/2502.13189) | ✅ | ❌ | ✅ | ❌ | ❌ |
+| 2024 | Multi-Head Latent Attention (MLA) | [MLA](docs/mla.md) | [Link](https://arxiv.org/abs/2405.04434) | ✅ | ❌ | ❌ | ❌ | ❌ |
+| 2025 | Mixture of Block Attention (MOBA) | [MOBA](docs/moba.md) | [Link](https://arxiv.org/abs/2502.13189) | ✅ | ❌ | ✅ | ❌ | ❌ |
 | 2026 | Qwen Sparse Attention (QSA) | [QSA](docs/qsa.md) | - | ✅ | ❌ | ❌ | ❌ | ❌ |
 
 The matrix is generated from [`attention/registry.py`](attention/registry.py)
@@ -107,6 +112,7 @@ attention/              # installable package
   registry.py          # kernel metadata / support matrix
   dispatch.py          # backend="auto" resolution
   mask.py              # shared mask conventions
+  norm.py              # shared RMSNorm variants
   rope.py              # shared RoPE utilities
   sdpa/                 # one directory per algorithm
     __init__.py         # public entry + available_backends()

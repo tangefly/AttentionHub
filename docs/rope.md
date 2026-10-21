@@ -53,9 +53,27 @@ cos, sin = build_rope_cache_batched(
 output, attention_weights = qsa(hidden_states, (cos, sin), attention_mask)
 ```
 
-完整示例见 [examples/qsa.py](../examples/qsa.py)。
+## 4 MLA 中的用法
 
-## 4 测试
+MLA 的 RoPE 只作用在解耦的 query/key 分量上，因此 `rotary_dim` 等于
+`qk_rope_head_dim`。MLA 默认使用 DeepSeek 的 interleaved 通道布局，内部会先把
+相邻通道重排成这里的 half 布局，再调用共享的 `apply_rotary_pos_emb`；
+`rope_layout="half"` 则直接使用 half 布局：
+
+```python
+from attention.mla import DeepseekV2Attention
+from attention.rope import build_rope_cache_batched
+
+cos, sin = build_rope_cache_batched(
+    batch, seq_len, qk_rope_head_dim, device=device, dtype=hidden_states.dtype
+)
+output, attention_weights = mla(hidden_states, (cos, sin), attention_mask)
+```
+
+完整示例见 [examples/mla.py](../examples/mla.py)。
+
+## 5 测试
 
 - [tests/test_rope.py](../tests/test_rope.py)：形状、`cos² + sin² = 1`、norm 保持、partial RoPE、dtype、异常输入。
 - [tests/test_qsa.py](../tests/test_qsa.py)：QSA 使用共享 RoPE 后与 dense attention 对齐。
+- [tests/test_mla.py](../tests/test_mla.py)：MLA 使用共享 RoPE 后与手工参考实现对齐。

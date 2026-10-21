@@ -28,6 +28,8 @@ __all__ = [
     "psa",
     "moba",
     "qsa",
+    "mla",
+    "norm",
     "rope",
     # compatibility aliases
     "scaled_dot_product_attention",
@@ -39,6 +41,9 @@ __all__ = [
     "moba_attn_varlen_naive",
     "moba_attn_varlen",
     "QwenSparseAttention",
+    "DeepseekV2Attention",
+    "RMSNorm",
+    "QwenRMSNorm",
     "build_rope_cache",
     "build_rope_cache_batched",
     "apply_rotary_pos_emb",
@@ -54,6 +59,8 @@ _LAZY_MODULES = {
     "psa": ".psa",
     "moba": ".moba",
     "qsa": ".qsa",
+    "mla": ".mla",
+    "norm": ".norm",
     "rope": ".rope",
 }
 
@@ -72,6 +79,9 @@ _LAZY_ATTRS = {
     "moba_attn_varlen_naive": (".moba.reference", "moba"),
     "moba_attn_varlen": (".moba", "moba_attn_varlen"),
     "QwenSparseAttention": (".qsa", "QwenSparseAttention"),
+    "DeepseekV2Attention": (".mla", "DeepseekV2Attention"),
+    "RMSNorm": (".norm", "RMSNorm"),
+    "QwenRMSNorm": (".norm", "QwenRMSNorm"),
     "build_rope_cache": (".rope", "build_rope_cache"),
     "build_rope_cache_batched": (".rope", "build_rope_cache_batched"),
     "apply_rotary_pos_emb": (".rope", "apply_rotary_pos_emb"),

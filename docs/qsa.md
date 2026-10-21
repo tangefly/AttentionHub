@@ -82,5 +82,6 @@ output, attention_weights = layer(hidden_states, (cos, sin), attention_mask)
 ## 5 实现
 
 - 参考实现：[attention/qsa/layer.py](../attention/qsa/layer.py)
+- 共享 RMSNorm：[attention/norm.py](../attention/norm.py)
 - 示例：[examples/qsa.py](../examples/qsa.py)
 - 测试：[tests/test_qsa.py](../tests/test_qsa.py)
