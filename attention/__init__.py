@@ -28,6 +28,7 @@ __all__ = [
     "psa",
     "moba",
     "qsa",
+    "rope",
     # compatibility aliases
     "scaled_dot_product_attention",
     "multi_query_attention",
@@ -38,6 +39,10 @@ __all__ = [
     "moba_attn_varlen_naive",
     "moba_attn_varlen",
     "QwenSparseAttention",
+    "build_rope_cache",
+    "build_rope_cache_batched",
+    "apply_rotary_pos_emb",
+    "rotate_half",
     "QSAIndexer",
 ]
 
@@ -49,6 +54,7 @@ _LAZY_MODULES = {
     "psa": ".psa",
     "moba": ".moba",
     "qsa": ".qsa",
+    "rope": ".rope",
 }
 
 # name -> (relative module, attribute)
@@ -66,6 +72,10 @@ _LAZY_ATTRS = {
     "moba_attn_varlen_naive": (".moba.reference", "moba"),
     "moba_attn_varlen": (".moba", "moba_attn_varlen"),
     "QwenSparseAttention": (".qsa", "QwenSparseAttention"),
+    "build_rope_cache": (".rope", "build_rope_cache"),
+    "build_rope_cache_batched": (".rope", "build_rope_cache_batched"),
+    "apply_rotary_pos_emb": (".rope", "apply_rotary_pos_emb"),
+    "rotate_half": (".rope", "rotate_half"),
     "QSAIndexer": (".qsa", "QSAIndexer"),
 }
 

@@ -1,13 +1,14 @@
 from attention.qsa import QwenSparseAttention
+from attention.rope import build_rope_cache_batched
 import torch
 
 
 def main():
-    b, n = 2, 128
-    hidden_size = 256
-    num_heads, num_kv_heads, head_dim = 4, 2, 64
-    indexer_n_heads, indexer_kv_heads, indexer_head_dim = 2, 1, 32
-    indexer_budget, indexer_compress_ratio = 32, 8
+    b, n = 24, 512
+    hidden_size = 2560
+    num_heads, num_kv_heads, head_dim = 24, 2, 256
+    indexer_n_heads, indexer_kv_heads, indexer_head_dim = 4, 1, 128
+    indexer_budget, indexer_compress_ratio = 2048, 4
     rotary_dim = 32
     dtype = torch.float32
 
@@ -33,15 +34,9 @@ def main():
     hidden_states = torch.randn(b, n, hidden_size, device=device, dtype=dtype)
 
     # RoPE cos/sin for every position: (batch, seq_len, rotary_dim)
-    angles = (
-        torch.arange(0, rotary_dim, 2, device=device, dtype=torch.float32)
-        / rotary_dim
+    cos, sin = build_rope_cache_batched(
+        b, n, rotary_dim, device=device, dtype=dtype
     )
-    inv_freq = 1.0 / (10000**angles)
-    freqs = torch.outer(torch.arange(n, device=device, dtype=torch.float32), inv_freq)
-    emb = torch.cat((freqs, freqs), dim=-1)
-    cos = emb.cos().unsqueeze(0).expand(b, -1, -1)
-    sin = emb.sin().unsqueeze(0).expand(b, -1, -1)
 
     # Additive causal mask: (batch, 1, seq_len, seq_len)
     causal = torch.ones(n, n, device=device, dtype=torch.bool).tril()

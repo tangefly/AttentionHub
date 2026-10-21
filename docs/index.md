@@ -27,3 +27,7 @@ attention/<algorithm>/
 ## 约定
 
 所有实现共享的 tensor layout、mask 语义、返回值和 backend 选择规则见 [conventions.md](conventions.md)。
+
+## 工具
+
+- [RoPE 位置编码](rope.md)：cos/sin 构造与旋转应用。

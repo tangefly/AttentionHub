@@ -69,6 +69,22 @@ import attention
 attention.available_backends("sdpa")  # ('reference', 'torch')
 ```
 
+## RoPE utilities
+
+RoPE cache construction and application live in
+[attention/rope.py](attention/rope.py):
+
+```python
+from attention.rope import apply_rotary_pos_emb, build_rope_cache_batched
+
+cos, sin = build_rope_cache_batched(
+    batch, seq_len, rotary_dim, device=device, dtype=q.dtype
+)
+q, k = apply_rotary_pos_emb(q, k, cos, sin)
+```
+
+See [docs/rope.md](docs/rope.md) for the full API.
+
 ## Supported kernels
 
 | Year | Kernel | Docs | Paper | Reference | Torch | Flash | Triton | CUDA |
@@ -91,6 +107,7 @@ attention/              # installable package
   registry.py          # kernel metadata / support matrix
   dispatch.py          # backend="auto" resolution
   mask.py              # shared mask conventions
+  rope.py              # shared RoPE utilities
   sdpa/                 # one directory per algorithm
     __init__.py         # public entry + available_backends()
     reference.py

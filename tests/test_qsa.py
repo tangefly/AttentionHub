@@ -5,7 +5,8 @@ import math
 import torch
 
 from attention.qsa import QwenSparseAttention
-from attention.qsa.layer import apply_rotary_pos_emb, repeat_kv
+from attention.qsa.layer import repeat_kv
+from attention.rope import apply_rotary_pos_emb, build_rope_cache_batched
 
 
 def _make_layer(seq_len: int) -> QwenSparseAttention:
@@ -25,20 +26,6 @@ def _make_layer(seq_len: int) -> QwenSparseAttention:
     ).eval()
 
 
-def _rope(batch: int, seq_len: int, dim: int, device):
-    inv_freq = 1.0 / (
-        10000
-        ** (torch.arange(0, dim, 2, device=device, dtype=torch.float32) / dim)
-    )
-    freqs = torch.outer(
-        torch.arange(seq_len, device=device, dtype=torch.float32), inv_freq
-    )
-    emb = torch.cat((freqs, freqs), dim=-1)
-    return emb.cos().unsqueeze(0).expand(batch, -1, -1), emb.sin().unsqueeze(
-        0
-    ).expand(batch, -1, -1)
-
-
 def _causal_mask(batch: int, seq_len: int, device, dtype):
     causal = torch.ones(seq_len, seq_len, device=device, dtype=torch.bool).tril()
     mask = torch.zeros(batch, 1, seq_len, seq_len, device=device, dtype=dtype)
@@ -51,7 +38,7 @@ def test_qsa_full_budget_matches_dense(device):
     batch, seq_len = 2, 32
     layer = _make_layer(seq_len).to(device)
     hidden = torch.randn(batch, seq_len, 64, device=device)
-    cos, sin = _rope(batch, seq_len, 16, device)
+    cos, sin = build_rope_cache_batched(batch, seq_len, 16, device=device)
     mask = _causal_mask(batch, seq_len, device, torch.float32)
 
     output, weights = layer(hidden, (cos, sin), mask)
@@ -87,7 +74,7 @@ def test_qsa_bool_and_float_masks_are_equivalent(device):
     batch, seq_len = 2, 32
     layer = _make_layer(seq_len).to(device)
     hidden = torch.randn(batch, seq_len, 64, device=device)
-    cos, sin = _rope(batch, seq_len, 16, device)
+    cos, sin = build_rope_cache_batched(batch, seq_len, 16, device=device)
     float_mask = _causal_mask(batch, seq_len, device, torch.float32)
     bool_mask = float_mask == 0
 

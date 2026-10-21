@@ -47,6 +47,7 @@ QSA 是一个带参数的层，不是纯函数算子：
 
 ```python
 from attention.qsa import QwenSparseAttention
+from attention.rope import build_rope_cache_batched
 
 layer = QwenSparseAttention(
     head_dim=64,
@@ -63,6 +64,9 @@ layer = QwenSparseAttention(
     indexer_compress_ratio=8,
 )
 
+cos, sin = build_rope_cache_batched(
+    batch, seq_len, rotary_dim, device=hidden_states.device, dtype=hidden_states.dtype
+)
 output, attention_weights = layer(hidden_states, (cos, sin), attention_mask)
 ```
 
@@ -71,7 +75,7 @@ output, attention_weights = layer(hidden_states, (cos, sin), attention_mask)
 - `indexer_kv_heads` 必须为 1。
 - `indexer_budget` 必须能被 `indexer_compress_ratio` 整除。
 - `attention_mask` 为 4D，bool（`True` = 可见）或 additive float。
-- `position_embeddings` 是 `(cos, sin)`，形状 `(B, N, rotary_dim)`。
+- `position_embeddings` 是 `(cos, sin)`，形状 `(B, N, rotary_dim)`，可用 [attention/rope.py](../attention/rope.py) 构造。
 
 完整可运行示例见 [examples/qsa.py](../examples/qsa.py)。
 

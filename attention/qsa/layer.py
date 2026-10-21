@@ -2,28 +2,7 @@ from torch import nn
 import torch
 import math
 
-def rotate_half(x):
-    """Rotates half the hidden dims of the input."""
-    x1 = x[..., : x.shape[-1] // 2]
-    x2 = x[..., x.shape[-1] // 2 :]
-    return torch.cat((-x2, x1), dim=-1)
-
-def apply_rotary_pos_emb(q, k=None, cos=None, sin=None, unsqueeze_dim=1):
-    cos = cos.unsqueeze(unsqueeze_dim)
-    sin = sin.unsqueeze(unsqueeze_dim)
-    rotary_dim = cos.shape[-1]
-
-    q_rope, q_nope = q[..., :rotary_dim], q[..., rotary_dim:]
-    q_rope = (q_rope * cos) + (rotate_half(q_rope) * sin)
-    q_rotated = torch.cat([q_rope, q_nope], dim=-1)
-
-    if k is not None:
-        k_rope, k_nope = k[..., :rotary_dim], k[..., rotary_dim:]
-        k_rope = (k_rope * cos) + (rotate_half(k_rope) * sin)
-        k_rotated = torch.cat([k_rope, k_nope], dim=-1)
-        return q_rotated, k_rotated
-    else:
-        return q_rotated
+from ..rope import apply_rotary_pos_emb
 
 def repeat_kv(hidden_states, n_rep):
     """Repeat KV heads to match the number of query heads (GQA/MQA)."""
