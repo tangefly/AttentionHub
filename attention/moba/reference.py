@@ -1,10 +1,11 @@
 """A clean version of moba implementation for educational purposes"""
 
-import torch
 import math
 
+import torch
 
-def moba_attn_varlen_naive(
+
+def moba(
     q: torch.Tensor,
     k: torch.Tensor,
     v: torch.Tensor,
@@ -94,3 +95,6 @@ def moba_attn_varlen_naive(
         o = o.type_as(q)
 
     return o
+
+
+moba_attn_varlen_naive = moba

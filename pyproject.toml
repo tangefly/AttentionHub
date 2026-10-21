@@ -5,18 +5,56 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "AttentionHub"
 version = "0.1.0"
-description = "Various attention implementations."
+description = "Reference and fast implementations of attention variants."
 readme = "README.md"
-requires-python = ">=3.9"
-
+requires-python = ">=3.10"
+license = { file = "LICENSE" }
+authors = [{ name = "AttentionHub contributors" }]
+keywords = ["attention", "transformer", "triton", "cuda", "flash-attn"]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
 dependencies = [
     "torch",
     "einops",
     "numpy",
     "matplotlib",
-    "psutil"
+    "psutil",
+]
+
+[project.optional-dependencies]
+triton = ["triton>=3.0"]
+flash = ["flash-attn>=2.7"]
+dev = [
+    "pytest>=8",
+    "pytest-cov",
+    "ruff>=0.6",
 ]
 
 [tool.setuptools.packages.find]
 where = ["."]
 include = ["attention*"]
+
+[tool.setuptools.package-data]
+attention = ["py.typed", "**/*.cu", "**/*.cuh", "**/*.cpp"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-ra"
+markers = [
+    "gpu: requires a CUDA device",
+    "flash: requires flash-attn and a CUDA device",
+    "triton: requires triton and a CUDA device",
+]
+
+[tool.ruff]
+line-length = 120
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E", "F"]
+ignore = ["E501", "E741"]
