@@ -4,7 +4,7 @@ import math
 
 import torch
 
-from attention.qsa import QSA, QwenSparseAttention
+from attention.qsa import QwenSparseAttention
 from attention.qsa.layer import apply_rotary_pos_emb, repeat_kv
 
 
@@ -96,6 +96,3 @@ def test_qsa_bool_and_float_masks_are_equivalent(device):
 
     assert torch.allclose(output_float, output_bool, atol=1e-6, rtol=1e-5)
 
-
-def test_qsa_alias():
-    assert QSA is QwenSparseAttention

@@ -2,13 +2,7 @@
 
 from __future__ import annotations
 
-from .layer import (
-    QSA,
-    QSALayer,
-    QSAIndexer,
-    Qwen4ExpTextAttention,
-    QwenSparseAttention,
-)
+from .layer import QSAIndexer, QwenSparseAttention
 
 
 def available_backends() -> tuple[str, ...]:
@@ -16,10 +10,7 @@ def available_backends() -> tuple[str, ...]:
 
 
 __all__ = [
-    "QSA",
-    "QSALayer",
     "QSAIndexer",
-    "Qwen4ExpTextAttention",
     "QwenSparseAttention",
     "available_backends",
 ]

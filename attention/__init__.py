@@ -38,8 +38,6 @@ __all__ = [
     "moba_attn_varlen_naive",
     "moba_attn_varlen",
     "QwenSparseAttention",
-    "Qwen4ExpTextAttention",
-    "QSA",
     "QSAIndexer",
 ]
 
@@ -68,8 +66,6 @@ _LAZY_ATTRS = {
     "moba_attn_varlen_naive": (".moba.reference", "moba"),
     "moba_attn_varlen": (".moba", "moba_attn_varlen"),
     "QwenSparseAttention": (".qsa", "QwenSparseAttention"),
-    "Qwen4ExpTextAttention": (".qsa", "QwenSparseAttention"),
-    "QSA": (".qsa", "QSA"),
     "QSAIndexer": (".qsa", "QSAIndexer"),
 }
 
