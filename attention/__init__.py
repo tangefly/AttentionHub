@@ -29,6 +29,7 @@ __all__ = [
     "moba",
     "qsa",
     "mla",
+    "dsa",
     "norm",
     "rope",
     # compatibility aliases
@@ -42,6 +43,8 @@ __all__ = [
     "moba_attn_varlen",
     "QwenSparseAttention",
     "DeepseekV2Attention",
+    "DeepseekSparseAttention",
+    "DeepseekSparseIndexer",
     "RMSNorm",
     "QwenRMSNorm",
     "build_rope_cache",
@@ -60,6 +63,7 @@ _LAZY_MODULES = {
     "moba": ".moba",
     "qsa": ".qsa",
     "mla": ".mla",
+    "dsa": ".dsa",
     "norm": ".norm",
     "rope": ".rope",
 }
@@ -80,6 +84,8 @@ _LAZY_ATTRS = {
     "moba_attn_varlen": (".moba", "moba_attn_varlen"),
     "QwenSparseAttention": (".qsa", "QwenSparseAttention"),
     "DeepseekV2Attention": (".mla", "DeepseekV2Attention"),
+    "DeepseekSparseAttention": (".dsa", "DeepseekSparseAttention"),
+    "DeepseekSparseIndexer": (".dsa", "DeepseekSparseIndexer"),
     "RMSNorm": (".norm", "RMSNorm"),
     "QwenRMSNorm": (".norm", "QwenRMSNorm"),
     "build_rope_cache": (".rope", "build_rope_cache"),

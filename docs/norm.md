@@ -1,13 +1,16 @@
 # RMSNorm
 
-MLA 和 QSA 都需要 RMSNorm，但两者的参数化方式不同：
+MLA、QSA 和 DSA 都会用到 RMSNorm，但参数化方式不同：
 
 | 变体 | 可学习参数初始化 | 前向缩放 | 使用位置 |
 | --- | --- | --- | --- |
-| `RMSNorm` | 全 1 | `weight * x / rms(x)` | MLA 的 query latent / KV latent |
+| `RMSNorm` | 全 1 | `weight * x / rms(x)` | MLA / DSA 的 query latent 与 KV latent |
 | `QwenRMSNorm` | 全 0 | `(1 + weight) * x / rms(x)` | QSA 的 q/k norm 与 indexer |
 
 两者都在 [attention/norm.py](../attention/norm.py) 中实现，避免各层重复维护同一段归一化逻辑。
+
+DSA 的 indexer key 使用 PyTorch 自带的 `nn.LayerNorm`（带均值中心化），
+与主注意力的 RMSNorm 不同，因此不在本模块中实现。
 
 ## 1 数学形式
 
@@ -80,6 +83,16 @@ layer = QwenSparseAttention(...)
 # / layer.indexer.k_layernorm 都是 QwenRMSNorm
 ```
 
+DSA 复用 MLA 的 `RMSNorm`；它的 `layer.indexer.k_norm` 是 `nn.LayerNorm`：
+
+```python
+from attention.dsa import DeepseekSparseAttention
+
+layer = DeepseekSparseAttention(...)
+# layer.q_a_layernorm / layer.kv_a_layernorm 是 RMSNorm
+# layer.indexer.k_norm 是 nn.LayerNorm
+```
+
 ## 4 测试
 
 - [tests/test_norm.py](../tests/test_norm.py)：两种参数化、group 归一化、
@@ -87,3 +100,5 @@ layer = QwenSparseAttention(...)
 - [tests/test_qsa.py](../tests/test_qsa.py)：QSA 改用共享 RMSNorm 后仍与 dense
   attention 对齐。
 - [tests/test_mla.py](../tests/test_mla.py)：MLA 使用共享 RMSNorm 后的数值正确性。
+- [tests/test_dsa.py](../tests/test_dsa.py)：DSA 复用 MLA 的 RMSNorm，indexer
+  的 LayerNorm 与手写打分公式对齐。

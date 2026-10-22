@@ -85,6 +85,15 @@ KERNELS: dict[str, KernelSpec] = {
         backends=("reference",),
         docs="docs/qsa.md",
     ),
+    "dsa": KernelSpec(
+        name="dsa",
+        full_name="DeepSeek Sparse Attention",
+        year=2025,
+        category="sparse",
+        paper="https://github.com/deepseek-ai/DeepSeek-V3.2-Exp",
+        backends=("reference",),
+        docs="docs/dsa.md",
+    ),
     "mla": KernelSpec(
         name="mla",
         full_name="Multi-Head Latent Attention",

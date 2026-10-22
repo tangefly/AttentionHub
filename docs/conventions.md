@@ -5,7 +5,7 @@
 ## 1. 函数与层级
 
 - **纯函数算子**放在 `reference.py` / `torch.py` / `triton.py` / `cuda/` / `flash.py` 中，对外暴露同名函数，例如 `attention.sdpa.reference.sdpa` 和 `attention.sdpa.torch.sdpa`。
-- **带参数的层**放在 `layer.py` 中，例如 `attention.psa.layer.PredictSparseAttention`、`attention.qsa.layer.QwenSparseAttention` 和 `attention.mla.layer.DeepseekV2Attention`。
+- **带参数的层**放在 `layer.py` 中，例如 `attention.psa.layer.PredictSparseAttention`、`attention.qsa.layer.QwenSparseAttention`、`attention.mla.layer.DeepseekV2Attention` 和 `attention.dsa.layer.DeepseekSparseAttention`。
 - 每个算法目录的 `__init__.py` 暴露公共入口、`available_backends()` 和必要的兼容别名。
 
 ## 2. Tensor layout
@@ -20,20 +20,21 @@
 | MoBA | Q/K/V `(T, H, D)` + `cu_seqlens` | packed variable-length，同 flash-attn |
 | QSA | hidden `(B, N, D)` + `position_embeddings` + `attention_mask` | 内部完成 Q/K/V 投影与稀疏选择 |
 | MLA | hidden `(B, N, D)` + `position_embeddings` + 可选 `attention_mask` | 内部完成低秩 Q/KV 投影；mask 省略时默认 causal |
+| DSA | hidden `(B, N, D)` + `position_embeddings` + 可选 `attention_mask` | MLA + indexer top-k 稀疏选择；mask 省略时默认 causal |
 
 ## 3. Mask 语义
 
 - **布尔 mask**：`True` 表示保留（attend），`False` 表示屏蔽。与 PyTorch 的 `scaled_dot_product_attention` 一致。
 - **浮点 mask**：additive，`0` 表示保留，`-inf` 或 `finfo.min` 表示屏蔽。
 - `causal=True` 与显式 `mask` 相互独立，可以同时使用；内部会把 causal mask 与用户 mask 合并。
-- MoBA/QSA 的稀疏 mask 由算法内部生成，不需要用户传入。
+- MoBA/QSA/DSA 的稀疏 mask 由算法内部生成，不需要用户传入。
 
 ## 4. 返回值
 
 - 纯函数算子默认只返回 `output`。
 - `return_attn=True` 时返回 `(output, attention_weights)`；只有 `reference` 后端保证支持，融合 kernel 可以明确拒绝。
 - MoBA 和 FTA 目前不返回 attention weights。
-- PSA/QSA/MLA 是层，返回 `(output, attention_weights)`。
+- PSA/QSA/MLA/DSA 是层，返回 `(output, attention_weights)`。
 
 ## 5. Backend 选择
 

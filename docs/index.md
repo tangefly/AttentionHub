@@ -22,6 +22,7 @@ attention/<algorithm>/
 | 2022 | Predictive Sparse Attention (PSA) | [PSA](psa.md) | [Link](https://arxiv.org/abs/2110.11299) | ✅ | ❌ | ❌ | ❌ | ❌ |
 | 2023 | Grouped-Query Attention (GQA) | [GQA](gqa.md) | [Link](https://arxiv.org/abs/2305.13245) | ✅ | ❌ | ❌ | ❌ | ❌ |
 | 2024 | Multi-Head Latent Attention (MLA) | [MLA](mla.md) | [Link](https://arxiv.org/abs/2405.04434) | ✅ | ❌ | ❌ | ❌ | ❌ |
+| 2025 | DeepSeek Sparse Attention (DSA) | [DSA](dsa.md) | [Link](https://github.com/deepseek-ai/DeepSeek-V3.2-Exp) | ✅ | ❌ | ❌ | ❌ | ❌ |
 | 2025 | Mixture of Block Attention (MOBA) | [MOBA](moba.md) | [Link](https://arxiv.org/abs/2502.13189) | ✅ | ❌ | ✅ | ❌ | ❌ |
 | 2026 | Qwen Sparse Attention (QSA) | [QSA](qsa.md) | - | ✅ | ❌ | ❌ | ❌ | ❌ |
 

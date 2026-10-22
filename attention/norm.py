@@ -3,7 +3,8 @@
 Two parameterizations are used in the hub:
 
 * :class:`RMSNorm` keeps a learnable scale initialized to one, so the layer
-  computes ``weight * x / rms(x)``.  This is the norm used by DeepSeek MLA.
+  computes ``weight * x / rms(x)``.  This is the norm used by DeepSeek MLA and
+  by the DSA main attention.
 * :class:`QwenRMSNorm` stores a zero-initialized offset and computes
   ``(1 + weight) * x / rms(x)``.  This is the norm used by the QSA indexer and
   by the QSA query/key normalization.
