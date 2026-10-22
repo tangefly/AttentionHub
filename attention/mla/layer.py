@@ -318,7 +318,7 @@ class MultiHeadLatentAttention(nn.Module):
         )
         # Both latents are single-head, 4D tensors so that every head shares
         # the same compressed representation.
-        k_nope = self.kv_a_layernorm(kv_nope).view(
+        kv_nope = self.kv_a_layernorm(kv_nope).view(
             batch_size, 1, seq_length, self.kv_lora_rank
         )
         k_pe = k_pe.view(batch_size, 1, seq_length, self.qk_rope_head_dim)
@@ -329,7 +329,7 @@ class MultiHeadLatentAttention(nn.Module):
         q_pe, k_pe = self.apply_rope(q_pe, k_pe, cos, sin)
 
         query_states = torch.cat((q_nope, q_pe), dim=-1)
-        key_states, value_states = self.expand_kv(k_nope, k_pe)
+        key_states, value_states = self.expand_kv(kv_nope, k_pe)
 
         if attention_mask is None:
             attention_mask = causal_mask(
