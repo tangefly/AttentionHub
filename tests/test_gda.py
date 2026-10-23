@@ -76,8 +76,15 @@ def test_recurrent_matches_reference_and_chunked(device):
     out_rec, state_rec = recurrent_gated_delta_rule(
         q, k, v, g, beta, output_final_state=True
     )
-    assert torch.allclose(out_rec, out_ref, atol=1e-6, rtol=1e-6)
-    assert torch.allclose(state_rec, state_ref, atol=1e-6, rtol=1e-6)
+    # The recurrent kernel mirrors ``transformers``' reduction order
+    # (``(state * x).sum(-2)`` instead of ``einsum``), so it agrees with the
+    # reference up to float32 rounding rather than bit for bit.
+    assert torch.allclose(
+        out_rec, out_ref, atol=tolerance(torch.float32), rtol=1e-4
+    )
+    assert torch.allclose(
+        state_rec, state_ref, atol=tolerance(torch.float32), rtol=1e-4
+    )
 
 
 def test_initial_and_final_state(device):
@@ -310,3 +317,89 @@ def test_conv_kernel_one(device):
     assert torch.allclose(
         step, full[:, -1:], atol=tolerance(torch.float32), rtol=1e-4
     )
+
+
+def _transformers_gda_kernels():
+    """Return the eager reference kernels shipped with ``transformers``.
+
+    The installed ``transformers`` dispatches these symbols to FLA's Triton
+    kernels when available, so ``__wrapped__`` is used to reach the pure
+    PyTorch fallback that :mod:`attention.gda.torch` is ported from.
+    """
+    try:
+        modeling = pytest.importorskip(
+            "transformers.models.qwen3_5.modeling_qwen3_5"
+        )
+    except Exception as exc:  # pragma: no cover - environment dependent
+        pytest.skip(f"transformers' Qwen3.5 kernels are unavailable: {exc}")
+
+    chunk = getattr(modeling, "torch_chunk_gated_delta_rule", None)
+    recurrent = getattr(modeling, "torch_recurrent_gated_delta_rule", None)
+    if chunk is None or recurrent is None:  # pragma: no cover - version drift
+        pytest.skip("installed transformers does not expose the torch GDA kernels")
+    return getattr(chunk, "__wrapped__", chunk), getattr(
+        recurrent, "__wrapped__", recurrent
+    )
+
+
+@pytest.mark.parametrize("chunk_size", [16, 64])
+def test_chunked_matches_transformers_torch_kernel(device, chunk_size):
+    chunk, _ = _transformers_gda_kernels()
+    q, k, v, g, beta = _inputs(device)
+    initial_state = torch.randn(2, 3, 8, 6, device=device)
+    kwargs = dict(
+        chunk_size=chunk_size,
+        initial_state=initial_state,
+        output_final_state=True,
+        use_qk_l2norm_in_kernel=True,
+    )
+    out, state = gda_torch.gated_delta_rule(q, k, v, g, beta, **kwargs)
+    ref_out, ref_state = chunk(q, k, v, g, beta, **kwargs)
+    # The port is line-for-line, so the eager results are expected to be
+    # bit-identical rather than merely close.
+    torch.testing.assert_close(out, ref_out, rtol=0, atol=0)
+    torch.testing.assert_close(state, ref_state, rtol=0, atol=0)
+
+
+def test_recurrent_matches_transformers_torch_kernel(device):
+    _, recurrent = _transformers_gda_kernels()
+    q, k, v, g, beta = _inputs(device)
+    initial_state = torch.randn(2, 3, 8, 6, device=device)
+    kwargs = dict(
+        initial_state=initial_state,
+        output_final_state=True,
+        use_qk_l2norm_in_kernel=True,
+    )
+    out, state = recurrent_gated_delta_rule(q, k, v, g, beta, **kwargs)
+    ref_out, ref_state = recurrent(q, k, v, g, beta, **kwargs)
+    torch.testing.assert_close(out, ref_out, rtol=0, atol=0)
+    torch.testing.assert_close(state, ref_state, rtol=0, atol=0)
+
+
+def test_export_fallback_matches_triangular_solve(device, monkeypatch):
+    q, k, v, g, beta = _inputs(device)
+    initial_state = torch.randn(2, 3, 8, 6, device=device)
+    kwargs = dict(
+        chunk_size=16,
+        initial_state=initial_state,
+        output_final_state=True,
+        use_qk_l2norm_in_kernel=True,
+    )
+    fast_out, fast_state = gda_torch.gated_delta_rule(q, k, v, g, beta, **kwargs)
+    monkeypatch.setattr(gda_torch, "_is_torchdynamo_exporting", lambda: True)
+    slow_out, slow_state = gda_torch.gated_delta_rule(q, k, v, g, beta, **kwargs)
+    atol = tolerance(torch.float32)
+    assert torch.allclose(fast_out, slow_out, atol=atol, rtol=1e-5)
+    assert torch.allclose(fast_state, slow_state, atol=atol, rtol=1e-5)
+
+
+def test_accepts_transformers_kernel_kwargs(device):
+    q, k, v, g, beta = _inputs(device)
+    # ``transformers`` call sites pass kernel-only kwargs such as cu_seqlens.
+    out_chunk, _ = gda_torch.gated_delta_rule(
+        q, k, v, g, beta, chunk_size=16, cu_seqlens=None
+    )
+    out_rec, _ = gda_torch.recurrent_gated_delta_rule(
+        q, k, v, g, beta, cu_seqlens=None
+    )
+    assert out_chunk.shape == out_rec.shape == (2, 37, 3, 6)

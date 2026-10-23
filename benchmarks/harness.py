@@ -53,8 +53,14 @@ def benchmark(
     backend: str = "auto",
     warmup: int = 5,
     iters: int = 20,
+    flops: int | None = None,
 ) -> BenchmarkResult:
-    """Time ``fn`` with device-appropriate synchronization."""
+    """Time ``fn`` with device-appropriate synchronization.
+
+    ``flops`` overrides the default dense-attention estimate, so algorithms
+    whose cost is not ``O(N^2)`` (linear attention, MoBA, ...) report a
+    meaningful TFLOPS number.
+    """
     for _ in range(warmup):
         fn()
     _synchronize(device)
@@ -74,7 +80,8 @@ def benchmark(
             fn()
         time_ms = (time.perf_counter() - start_time) * 1000 / iters
 
-    flops = attention_flops(batch, heads, seq_len, head_dim)
+    if flops is None:
+        flops = attention_flops(batch, heads, seq_len, head_dim)
     tflops = flops / (time_ms / 1000) / 1e12
     return BenchmarkResult(
         name=name,

@@ -136,6 +136,13 @@ out, final_state = gated_delta_rule(
 `chunk_size` 只影响 `torch` 后端；`initial_state` 可以传入上一段序列的状态，
 实现分段续算。`backend="auto"` 按仓库约定选择 `torch`。
 
+`torch` 后端是 `transformers` 中 `torch_chunk_gated_delta_rule` /
+`torch_recurrent_gated_delta_rule` 的逐行移植：默认参数下与 `transformers`
+的 eager fallback 逐位一致（见 [tests/test_gda.py](../tests/test_gda.py)），
+并额外接受 `transformers` / FLA 调用点传入的 kernel 关键字（如
+`cu_seqlens`，eager 路径会忽略）。`scale` 是本仓库的扩展，其默认值
+`head_k_dim ** -0.5` 与 `transformers` 相同。
+
 ### 4.2 GDA 层
 
 从 Qwen3.5 的 config 构造时，字段一一对应：
