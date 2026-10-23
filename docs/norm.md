@@ -12,6 +12,10 @@ MLA、QSA 和 DSA 都会用到 RMSNorm，但参数化方式不同：
 DSA 的 indexer key 使用 PyTorch 自带的 `nn.LayerNorm`（带均值中心化），
 与主注意力的 RMSNorm 不同，因此不在本模块中实现。
 
+GDA 的输出归一化带有 SiLU 门（`RMSNorm(o) * silu(z)`），参数化和调用方式
+都与上面两种不同，因此放在 [attention/gda/layer.py](../attention/gda/layer.py)
+的 `GatedRMSNorm` 中，等未来有更多层复用时再抽到本模块。
+
 ## 1 数学形式
 
 对最后一维（或每个 group）计算：

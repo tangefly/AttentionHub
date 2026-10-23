@@ -14,7 +14,7 @@ attention/<algorithm>/
     triton.py      # Triton kernel
     cuda/          # custom CUDA extension
     flash.py       # flash-attn integration
-    layer.py       # nn.Module variant (PSA, QSA, MLA, DSA)
+    layer.py       # nn.Module variant (PSA, QSA, MLA, DSA, GDA)
 ```
 
 ## Install
@@ -62,11 +62,13 @@ from attention.moba import moba
 from attention.qsa import QwenSparseAttention
 from attention.mla import DeepseekV2Attention
 from attention.dsa import DeepseekSparseAttention
+from attention.gda import GatedDeltaNet
 ```
 
-MLA, QSA and DSA are parameterized layers; their input projections, RoPE and
-masks are documented in [docs/mla.md](docs/mla.md), [docs/qsa.md](docs/qsa.md)
-and [docs/dsa.md](docs/dsa.md).
+MLA, QSA, DSA and GDA are parameterized layers; their input projections,
+RoPE/masks and (for GDA) the recurrent cache are documented in
+[docs/mla.md](docs/mla.md), [docs/qsa.md](docs/qsa.md), [docs/dsa.md](docs/dsa.md)
+and [docs/gda.md](docs/gda.md).
 
 `available_backends()` reports what can run in the current environment:
 
@@ -100,6 +102,7 @@ See [docs/rope.md](docs/rope.md) for the full API.
 | 2019 | Multi-Query Attention (MQA) | [MQA](docs/mqa.md) | [Link](https://arxiv.org/abs/1911.02150) | ✅ | ❌ | ❌ | ❌ | ❌ |
 | 2022 | Predictive Sparse Attention (PSA) | [PSA](docs/psa.md) | [Link](https://arxiv.org/abs/2110.11299) | ✅ | ❌ | ❌ | ❌ | ❌ |
 | 2023 | Grouped-Query Attention (GQA) | [GQA](docs/gqa.md) | [Link](https://arxiv.org/abs/2305.13245) | ✅ | ❌ | ❌ | ❌ | ❌ |
+| 2024 | Gated Delta Attention (GDA) | [GDA](docs/gda.md) | [Link](https://arxiv.org/abs/2412.06464) | ✅ | ✅ | ❌ | ❌ | ❌ |
 | 2024 | Multi-Head Latent Attention (MLA) | [MLA](docs/mla.md) | [Link](https://arxiv.org/abs/2405.04434) | ✅ | ❌ | ❌ | ❌ | ❌ |
 | 2025 | DeepSeek Sparse Attention (DSA) | [DSA](docs/dsa.md) | [Link](https://github.com/deepseek-ai/DeepSeek-V3.2-Exp) | ✅ | ❌ | ❌ | ❌ | ❌ |
 | 2025 | Mixture of Block Attention (MOBA) | [MOBA](docs/moba.md) | [Link](https://arxiv.org/abs/2502.13189) | ✅ | ❌ | ✅ | ❌ | ❌ |

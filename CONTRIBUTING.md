@@ -15,7 +15,7 @@ attention/<algorithm>/
     triton.py       # Triton kernel
     cuda/           # CUDA extension: binding.cpp, <algorithm>.cu, loader
     flash.py        # flash-attn integration
-    layer.py        # nn.Module variant (PSA, QSA)
+    layer.py        # nn.Module variant (PSA, QSA, MLA, DSA, GDA)
 ```
 
 A backend file exports the **same function name** as the algorithm:

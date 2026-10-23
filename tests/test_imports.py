@@ -22,6 +22,7 @@ def test_version_and_kernels():
         "qsa",
         "mla",
         "dsa",
+        "gda",
     }
 
 
@@ -45,6 +46,7 @@ def test_available_backends():
     assert "reference" in attention.available_backends("moba")
     assert attention.available_backends("mla") == ("reference",)
     assert attention.available_backends("dsa") == ("reference",)
+    assert attention.available_backends("gda") == ("reference", "torch")
 
 
 def test_compatibility_aliases():
@@ -53,5 +55,8 @@ def test_compatibility_aliases():
     assert attention.DeepseekV2Attention is not None
     assert attention.DeepseekSparseAttention is not None
     assert attention.DeepseekSparseIndexer is not None
+    assert attention.GatedDeltaNet is not None
+    assert attention.GatedDeltaAttention is not None
+    assert callable(attention.gated_delta_rule)
     assert attention.RMSNorm is not None
     assert attention.QwenRMSNorm is not None

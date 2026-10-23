@@ -5,7 +5,7 @@
 ## 1. 函数与层级
 
 - **纯函数算子**放在 `reference.py` / `torch.py` / `triton.py` / `cuda/` / `flash.py` 中，对外暴露同名函数，例如 `attention.sdpa.reference.sdpa` 和 `attention.sdpa.torch.sdpa`。
-- **带参数的层**放在 `layer.py` 中，例如 `attention.psa.layer.PredictSparseAttention`、`attention.qsa.layer.QwenSparseAttention`、`attention.mla.layer.DeepseekV2Attention` 和 `attention.dsa.layer.DeepseekSparseAttention`。
+- **带参数的层**放在 `layer.py` 中，例如 `attention.psa.layer.PredictSparseAttention`、`attention.qsa.layer.QwenSparseAttention`、`attention.mla.layer.DeepseekV2Attention`、`attention.dsa.layer.DeepseekSparseAttention` 和 `attention.gda.layer.GatedDeltaNet`。
 - 每个算法目录的 `__init__.py` 暴露公共入口、`available_backends()` 和必要的兼容别名。
 
 ## 2. Tensor layout
@@ -21,6 +21,7 @@
 | QSA | hidden `(B, N, D)` + `position_embeddings` + `attention_mask` | 内部完成 Q/K/V 投影与稀疏选择 |
 | MLA | hidden `(B, N, D)` + `position_embeddings` + 可选 `attention_mask` | 内部完成低秩 Q/KV 投影；mask 省略时默认 causal |
 | DSA | hidden `(B, N, D)` + `position_embeddings` + 可选 `attention_mask` | MLA + indexer top-k 稀疏选择；mask 省略时默认 causal |
+| GDA | hidden `(B, N, D)` + 可选 2D padding mask | 因果卷积 + gated delta rule；状态 `(B, Hv, Dk, Dv)`，支持增量解码 |
 
 ## 3. Mask 语义
 
@@ -35,6 +36,8 @@
 - `return_attn=True` 时返回 `(output, attention_weights)`；只有 `reference` 后端保证支持，融合 kernel 可以明确拒绝。
 - MoBA 和 FTA 目前不返回 attention weights。
 - PSA/QSA/MLA/DSA 是层，返回 `(output, attention_weights)`。
+- GDA 是递推层，没有 `N × N` 的 attention weights：默认只返回 `output`，`use_cache=True` 时返回 `(output, state)`。
+- GDA 的纯函数沿用 FLA 接口，始终返回 `(output, final_state)`；`output_final_state=False` 时 `final_state=None`。
 
 ## 5. Backend 选择
 

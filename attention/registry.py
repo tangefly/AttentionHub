@@ -94,6 +94,15 @@ KERNELS: dict[str, KernelSpec] = {
         backends=("reference",),
         docs="docs/dsa.md",
     ),
+    "gda": KernelSpec(
+        name="gda",
+        full_name="Gated Delta Attention",
+        year=2024,
+        category="linear",
+        paper="https://arxiv.org/abs/2412.06464",
+        backends=("reference", "torch"),
+        docs="docs/gda.md",
+    ),
     "mla": KernelSpec(
         name="mla",
         full_name="Multi-Head Latent Attention",
